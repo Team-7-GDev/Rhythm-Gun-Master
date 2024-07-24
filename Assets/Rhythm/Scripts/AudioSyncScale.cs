@@ -5,9 +5,20 @@ public class AudioSyncScale : AudioSyncer
 {
     public Vector3 restScale;
     public Vector3 beatScale;
+    public BeatPlayer beatPlayer;
 
     private Transform m_Transform;
     private Coroutine m_PreviousCoroutine;
+
+    private void OnEnable()
+    {
+        beatPlayer.OnBeat += OnBeat;
+    }
+
+    private void OnDisable()
+    {
+        beatPlayer.OnBeat -= OnBeat;
+    }
 
     private void Start()
     {
@@ -22,6 +33,11 @@ public class AudioSyncScale : AudioSyncer
             return;
 
         m_Transform.localScale = Vector3.Lerp(m_Transform.localScale, restScale, restSmoothTime * Time.deltaTime);
+    }
+
+    private void OnBeat(Beat[] beats)
+    {
+        OnBeat();
     }
 
     public override void OnBeat()

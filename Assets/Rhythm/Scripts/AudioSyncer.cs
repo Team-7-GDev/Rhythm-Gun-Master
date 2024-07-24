@@ -9,9 +9,9 @@ public class AudioSyncer : MonoBehaviour
     public float timeToBeat;
     public float restSmoothTime;
 
-    private float m_PreviousAudioValue;
-    private float m_AudioValue;
-    private float m_Timer;
+    //private float m_PreviousAudioValue;
+    //private float m_AudioValue;
+    //private float m_Timer;
 
     protected bool m_HasBeated;
 
@@ -42,7 +42,7 @@ public class AudioSyncer : MonoBehaviour
 
     public virtual void OnBeat()
     {
-        m_Timer = 0.0f;
+        //m_Timer = 0.0f;
         m_HasBeated = true;
     }
 }

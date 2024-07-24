@@ -1,19 +1,27 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class BeatPlayer : MonoBehaviour
 {
     public AudioSource audioSource;
     public AudioData audioData;
-    public AudioSyncer audioSyncer;
 
     [ReadOnly] public int startIndex;
 
+    public event System.Action<Beat[]> OnBeat = (_) => { };
+
     private float playbackTime;
+    private List<Beat> m_CurrentBeats;
 
     private void Awake()
     {
         audioSource.clip = audioData.clip;
         audioSource.Play();
+    }
+
+    private void Start()
+    {
+        m_CurrentBeats = new List<Beat>();
     }
 
     private void Update()
@@ -24,7 +32,6 @@ public class BeatPlayer : MonoBehaviour
         playbackTime = audioSource.time;
 
         bool isBeatDetected = false;
-        int beatCount = 0;
         for (int i = startIndex; i < audioData.beats.Length; i++)
         {
             if (playbackTime < audioData.beats[i].time)
@@ -34,16 +41,21 @@ public class BeatPlayer : MonoBehaviour
             }
 
             isBeatDetected = true;
-            beatCount++;
+            m_CurrentBeats.Add(audioData.beats[i]);
+
+            if (i == audioData.beats.Length - 1)
+                startIndex = i + 1;
         }
 
         if (isBeatDetected)
         {
-            OnBeat(beatCount);
+            Beat[] beats = m_CurrentBeats.ToArray();
+            OnBeat(beats);
+            m_CurrentBeats.Clear();
         }
     }
 
-    private void OnDrawGizmos()
+    private void OnDrawGizmosSelected()
     {
         if (!audioData)
             return;
@@ -57,13 +69,8 @@ public class BeatPlayer : MonoBehaviour
         Gizmos.color = Color.magenta;
 
         Beat prev = audioData.beats[Mathf.Max(startIndex - 1, 0)];
-        Beat next = audioData.beats[startIndex];
+        Beat next = audioData.beats[Mathf.Min(startIndex, audioData.beats.Length - 1)];
 
         Gizmos.DrawRay(new(playbackTime, 0.0f), new(0.0f, 100.0f * Mathf.Lerp(prev.strength, next.strength, Mathf.InverseLerp(prev.time, next.time, playbackTime))));
-    }
-
-    private void OnBeat(int beatCount)
-    {
-        audioSyncer.OnBeat();
     }
 }

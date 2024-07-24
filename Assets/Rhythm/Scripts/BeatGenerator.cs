@@ -6,6 +6,22 @@ using UnityEngine;
 [RequireComponent(typeof(AudioSource))]
 public class BeatGenerator : MonoBehaviour
 {
+    public struct PeakInfo
+    {
+        public float amplitude;
+        public float previousTime;
+        public float currentTime;
+        public float nextTime;
+
+        public PeakInfo(float amplitude, float previousTime, float currentTime, float nextTime)
+        {
+            this.amplitude = amplitude;
+            this.previousTime = previousTime;
+            this.currentTime = currentTime;
+            this.nextTime = nextTime;
+        }
+    }
+
     [SerializeField, Range(0.001f, 0.01f)] private float m_BeatThreshold = 0.0075f;
 
     private bool m_IsStopped;
@@ -13,7 +29,7 @@ public class BeatGenerator : MonoBehaviour
     private float[] m_Samples;
     private AudioSource m_AudioSource;
     private List<Vector2> m_BassData;
-    private List<Vector2> m_PeakData;
+    private List<PeakInfo> m_PeakData;
     private List<Vector2> m_BeatData;
 
     public float BeatThreshold
@@ -24,7 +40,7 @@ public class BeatGenerator : MonoBehaviour
     public bool IsStopped => m_IsStopped;
     public AudioSource Source => m_AudioSource;
     public List<Vector2> BassData => m_BassData;
-    public List<Vector2> PeakData => m_PeakData;
+    public List<PeakInfo> PeakData => m_PeakData;
     public List<Vector2> BeatData => m_BeatData;
 
     public event Action OnAudioStarted;
@@ -43,7 +59,7 @@ public class BeatGenerator : MonoBehaviour
     {
         m_Samples = new float[8192];
         m_BassData = new List<Vector2>();
-        m_PeakData = new List<Vector2>();
+        m_PeakData = new List<PeakInfo>();
         m_BeatData = new List<Vector2>();
     }
 
@@ -116,22 +132,26 @@ public class BeatGenerator : MonoBehaviour
     public void GeneratePeakData()
     {
         m_PeakData.Clear();
-        m_PeakData.Add(new(0.0f, 0.0f));
+        m_PeakData.Add(new(0.0f, 0.0f, 0.0f, 0.0f));
 
         for (int i = 1; i < m_BassData.Count - 1; i++)
         {
-            float prev = m_BassData[i - 1].x;
-            float curr = m_BassData[i].x;
-            float next = m_BassData[i + 1].x;
+            Vector2 prev = m_BassData[i - 1];
+            Vector2 curr = m_BassData[i];
+            Vector2 next = m_BassData[i + 1];
 
-            if (curr > prev && curr > next)
+            float prevAmplitude = prev.x;
+            float currAmplitude = curr.x;
+            float nextAmplitude = next.x;
+
+            if (currAmplitude > prevAmplitude && currAmplitude > nextAmplitude)
             {
-                m_PeakData.Add(m_BassData[i]);
+                m_PeakData.Add(new(curr.x, prev.y, curr.y, next.y));
             }
 
-            if (curr < prev && curr < next)
+            if (currAmplitude < prevAmplitude && currAmplitude < nextAmplitude)
             {
-                m_PeakData.Add(m_BassData[i]);
+                m_PeakData.Add(new(curr.x, prev.y, curr.y, next.y));
             }
         }
     }
@@ -142,15 +162,15 @@ public class BeatGenerator : MonoBehaviour
 
         for (int i = 1; i < m_PeakData.Count; i++)
         {
-            float prev = m_PeakData[i - 1].x;
-            float curr = m_PeakData[i].x;
+            PeakInfo prev = m_PeakData[i - 1];
+            PeakInfo curr = m_PeakData[i];
 
-            float diff = curr - prev;
+            float diff = curr.amplitude - prev.amplitude;
 
             if (diff <= m_BeatThreshold)
                 continue;
 
-            m_BeatData.Add(new(m_PeakData[i].x, m_PeakData[i - 1].y));
+            m_BeatData.Add(new(diff, prev.currentTime));
         }
     }
 
