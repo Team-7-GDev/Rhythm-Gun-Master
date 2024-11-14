@@ -28,6 +28,7 @@ public enum DiffcultyType
 public class GameManager : MonoBehaviour
 {
     public static Action OnGamePause = null;
+    public static Action<int, int, int> OnGameScoreUpdate = null;
 
 
     private static GameManager m_Instance = null;
@@ -40,6 +41,12 @@ public class GameManager : MonoBehaviour
 
     private BeatPlayer m_beatPlayer = null;
     private Coroutine m_inputCoroutine = null;
+
+
+    private int m_bulletUsed = 0;
+    private int m_currentScore = 0;
+    private int m_totalHeadHit = 0;
+    private int m_consecutiveHeadHit = 0;
 
 
 
@@ -70,6 +77,7 @@ public class GameManager : MonoBehaviour
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
 
+        Time.timeScale = 1.0f;
         m_Instance.m_beatPlayer.PauseUnpauseSong(false);
         m_Instance.m_inputCoroutine = m_Instance.StartCoroutine(m_Instance.LookForGamePause());
     }
@@ -101,9 +109,12 @@ public class GameManager : MonoBehaviour
         if (scene.name.Equals("Menu"))
         {
             // Do nothing here for now
+            Time.timeScale = 1.0f;
         }
         else if (scene.name.Equals("RoomA"))
         {
+            Time.timeScale = 1.0f;
+
             // setup the game play with the data choosen by the user...
             m_beatPlayer = FindObjectOfType<BeatPlayer>();
 
@@ -118,25 +129,52 @@ public class GameManager : MonoBehaviour
             botSpawner.SetDifficulty(m_currentDifficulty);
 
             // Adding first person hand
-            GameObject go = null;
+            WeaponsController fpsWeapon = null;
             switch (m_currentWeapon)
             {
                 case ChooseWeaponType.PISTOL:
-                    go = Resources.Load<GameObject>("Hands_Gun02");
+                    fpsWeapon = Resources.Load<WeaponsController>("Hands_Gun02");
                     break;
 
                 case ChooseWeaponType.ASSULT_RIFLE:
-                    go = Resources.Load<GameObject>("Hands_Automatic_rifle03");
+                    fpsWeapon = Resources.Load<WeaponsController>("Hands_Automatic_rifle03");
                     break;
             }
 
-            Instantiate<GameObject>(go, Vector3.zero, Quaternion.identity);
+            fpsWeapon = Instantiate<WeaponsController>(fpsWeapon, Vector3.zero, Quaternion.identity);
+            fpsWeapon.OnWeaponFired = () =>
+            {
+                m_bulletUsed++;
+                OnGameScoreUpdate?.Invoke(m_currentScore, m_bulletUsed, m_totalHeadHit);
+            };
+
+            fpsWeapon.OnBotHit = (bool isHead) =>
+            {
+                m_bulletUsed++;
+                if (isHead)
+                {
+                    m_totalHeadHit++;
+                    m_consecutiveHeadHit++;
+                    m_currentScore += m_consecutiveHeadHit * 10;
+                }
+                else
+                {
+                    m_consecutiveHeadHit = 0;
+                    m_currentScore += 5;
+                }
+
+                OnGameScoreUpdate?.Invoke(m_currentScore, m_bulletUsed, m_totalHeadHit);
+            };
 
             // Initialize camera and beatplayer
             firstPersonCamera.Initialize();
 
             IsGameOver = false;
             IsGamePause = false;
+
+            m_bulletUsed = 0;
+            m_currentScore = 0;
+            m_consecutiveHeadHit = 0;
 
             m_inputCoroutine = StartCoroutine(LookForGamePause());
         }
@@ -157,6 +195,8 @@ public class GameManager : MonoBehaviour
                 StopCoroutine(m_inputCoroutine);
 
                 OnGamePause?.Invoke();
+
+                Time.timeScale = 0.00001f;
                 break;
             }
 

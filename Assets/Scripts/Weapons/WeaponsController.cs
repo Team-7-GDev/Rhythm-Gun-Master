@@ -5,6 +5,8 @@ using UnityEngine;
 [RequireComponent(typeof(AudioSource))]
 public class WeaponsController : MonoBehaviour
 {
+    public Action OnWeaponFired;
+    public Action<bool> OnBotHit;
 
     [SerializeField]
     private enum WeaponType
@@ -108,14 +110,16 @@ public class WeaponsController : MonoBehaviour
         {
             switch (hitInfo.collider.tag)
             {
-                case "Torso":
-                    Debug.Log($"Torso hit: {hitInfo.collider.name} - {hitInfo.transform.root.name}...");
-                    hitInfo.transform.root.gameObject.SetActive(false);
-                    break;
-
                 case "Head":
+                    OnBotHit?.Invoke(true);
                     Debug.Log($"Head Hit: {hitInfo.collider.name} - {hitInfo.transform.root.name}...");
                     hitInfo.transform.root.root.gameObject.SetActive(false);
+                    break;
+
+                case "Torso":
+                    OnBotHit?.Invoke(false);
+                    Debug.Log($"Torso hit: {hitInfo.collider.name} - {hitInfo.transform.root.name}...");
+                    hitInfo.transform.root.gameObject.SetActive(false);
                     break;
             }
 
@@ -123,6 +127,10 @@ public class WeaponsController : MonoBehaviour
 
             spawnedHit.transform.LookAt(Camera.main.transform);
             spawnedHit.transform.position = hitInfo.point;
+        }
+        else
+        {
+            OnWeaponFired?.Invoke();
         }
     }
 
