@@ -1,0 +1,354 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4d744a444e0c8a48b23123ab07ef032, type: 3}
+  m_Name: ONE_LOVE
+  m_EditorClassIdentifier: 
+  clip: {fileID: 8300000, guid: 406165af1f5521d419fea8185c76e634, type: 3}
+  beats:
+  - strength: 0.019232024
+    time: 3.2213151
+  - strength: 0.017088678
+    time: 4.522653
+  - strength: 0.0185575
+    time: 5.7813153
+  - strength: 0.01714843
+    time: 7.061315
+  - strength: 0.017677037
+    time: 8.191996
+  - strength: 0.017653305
+    time: 9.578662
+  - strength: 0.020929772
+    time: 10.815987
+  - strength: 0.011309518
+    time: 12.757324
+  - strength: 0.01450387
+    time: 13.3119955
+  - strength: 0.019581746
+    time: 14.527982
+  - strength: 0.022037877
+    time: 15.893311
+  - strength: 0.010027923
+    time: 17.045328
+  - strength: 0.012717201
+    time: 17.237324
+  - strength: 0.015283277
+    time: 18.38932
+  - strength: 0.020295626
+    time: 19.562653
+  - strength: 0.017348161
+    time: 20.906645
+  - strength: 0.022614941
+    time: 21.951996
+  - strength: 0.012511956
+    time: 22.847982
+  - strength: 0.019939331
+    time: 24.618662
+  - strength: 0.020010747
+    time: 25.962652
+  - strength: 0.022344632
+    time: 27.157324
+  - strength: 0.012760554
+    time: 28.501316
+  - strength: 0.020019706
+    time: 29.674648
+  - strength: 0.015638461
+    time: 31.018661
+  - strength: 0.021578232
+    time: 32.042652
+  - strength: 0.015007658
+    time: 32.959976
+  - strength: 0.019158943
+    time: 34.73066
+  - strength: 0.021222455
+    time: 36.095985
+  - strength: 0.021410406
+    time: 37.26932
+  - strength: 0.0140225645
+    time: 38.591995
+  - strength: 0.019118184
+    time: 39.786644
+  - strength: 0.017085062
+    time: 41.130657
+  - strength: 0.022155222
+    time: 42.133312
+  - strength: 0.011331326
+    time: 43.071995
+  - strength: 0.020220332
+    time: 44.84265
+  - strength: 0.020181859
+    time: 46.186646
+  - strength: 0.020452091
+    time: 47.359978
+  - strength: 0.015121269
+    time: 48.70399
+  - strength: 0.02032619
+    time: 49.898663
+  - strength: 0.015589724
+    time: 51.221313
+  - strength: 0.020530494
+    time: 52.22399
+  - strength: 0.015659275
+    time: 53.162655
+  - strength: 0.010751907
+    time: 53.84533
+  - strength: 0.018460587
+    time: 54.954647
+  - strength: 0.019839203
+    time: 56.319977
+  - strength: 0.017699815
+    time: 57.471996
+  - strength: 0.012918299
+    time: 58.815987
+  - strength: 0.017899347
+    time: 60.01066
+  - strength: 0.018442422
+    time: 61.33331
+  - strength: 0.019270591
+    time: 62.506645
+  - strength: 0.011530673
+    time: 63.295986
+  - strength: 0.018785385
+    time: 65.04533
+  - strength: 0.019466177
+    time: 66.41066
+  - strength: 0.020709021
+    time: 67.58399
+  - strength: 0.014184568
+    time: 68.90665
+  - strength: 0.017714579
+    time: 70.10132
+  - strength: 0.014458433
+    time: 71.42399
+  - strength: 0.01769644
+    time: 72.44798
+  - strength: 0.014212121
+    time: 73.38664
+  - strength: 0.010522055
+    time: 74.06932
+  - strength: 0.02246222
+    time: 74.96533
+  - strength: 0.017187983
+    time: 76.50131
+  - strength: 0.020712372
+    time: 77.11998
+  - strength: 0.02099918
+    time: 77.80265
+  - strength: 0.020228859
+    time: 78.42132
+  - strength: 0.01941497
+    time: 80.19199
+  - strength: 0.022345673
+    time: 81.57866
+  - strength: 0.021746412
+    time: 82.73066
+  - strength: 0.010514328
+    time: 83.818665
+  - strength: 0.013508676
+    time: 84.074646
+  - strength: 0.018876871
+    time: 85.24798
+  - strength: 0.014188237
+    time: 86.591995
+  - strength: 0.017651351
+    time: 87.89331
+  - strength: 0.010268878
+    time: 88.25599
+  - strength: 0.010085727
+    time: 88.55465
+  - strength: 0.01204673
+    time: 89.21599
+  - strength: 0.021421468
+    time: 90.30399
+  - strength: 0.02179559
+    time: 91.66932
+  - strength: 0.021758175
+    time: 92.84265
+  - strength: 0.013628836
+    time: 94.186646
+  - strength: 0.021162622
+    time: 95.35998
+  - strength: 0.016671238
+    time: 96.70399
+  - strength: 0.019906843
+    time: 97.72798
+  - strength: 0.015532421
+    time: 98.64533
+  - strength: 0.020096341
+    time: 100.28798
+  - strength: 0.021429917
+    time: 101.78132
+  - strength: 0.021472251
+    time: 102.95465
+  - strength: 0.012492485
+    time: 104.27732
+  - strength: 0.018178605
+    time: 105.47199
+  - strength: 0.016913146
+    time: 106.81599
+  - strength: 0.022056691
+    time: 107.818665
+  - strength: 0.013107547
+    time: 108.757324
+  - strength: 0.018301027
+    time: 110.527985
+  - strength: 0.021583138
+    time: 111.871994
+  - strength: 0.021582551
+    time: 113.04533
+  - strength: 0.01230767
+    time: 114.38932
+  - strength: 0.021030186
+    time: 115.58399
+  - strength: 0.014245526
+    time: 116.92798
+  - strength: 0.019508531
+    time: 117.90932
+  - strength: 0.016273063
+    time: 118.847984
+  - strength: 0.018450662
+    time: 120.63998
+  - strength: 0.020723023
+    time: 122.005325
+  - strength: 0.021085398
+    time: 122.98664
+  - strength: 0.015174745
+    time: 124.50131
+  - strength: 0.019863134
+    time: 125.50399
+  - strength: 0.017522633
+    time: 127.01866
+  - strength: 0.019280791
+    time: 128.064
+  - strength: 0.01029271
+    time: 128.98131
+  - strength: 0.017369827
+    time: 130.73065
+  - strength: 0.019341804
+    time: 132.096
+  - strength: 0.020492394
+    time: 133.26932
+  - strength: 0.01324174
+    time: 134.592
+  - strength: 0.017877992
+    time: 135.78665
+  - strength: 0.014066458
+    time: 137.13066
+  - strength: 0.017802676
+    time: 138.15465
+  - strength: 0.013374625
+    time: 139.07199
+  - strength: 0.0109909605
+    time: 139.75465
+  - strength: 0.021922452
+    time: 140.672
+  - strength: 0.016197268
+    time: 142.16533
+  - strength: 0.020593539
+    time: 142.80533
+  - strength: 0.021299489
+    time: 143.46664
+  - strength: 0.019135276
+    time: 144.08533
+  - strength: 0.015249064
+    time: 144.68265
+  - strength: 0.018553207
+    time: 145.66399
+  - strength: 0.013103455
+    time: 146.04799
+  - strength: 0.018253734
+    time: 147.26399
+  - strength: 0.0166265
+    time: 147.75465
+  - strength: 0.014520686
+    time: 148.52266
+  - strength: 0.014285059
+    time: 149.75998
+  - strength: 0.0195056
+    time: 150.71997
+  - strength: 0.010918343
+    time: 151.10399
+  - strength: 0.011524456
+    time: 152.27733
+  - strength: 0.011164309
+    time: 153.62132
+  - strength: 0.011089951
+    time: 154.23997
+  - strength: 0.015027465
+    time: 154.79465
+  - strength: 0.01730454
+    time: 155.77599
+  - strength: 0.012147123
+    time: 156.15997
+  - strength: 0.017833138
+    time: 157.35464
+  - strength: 0.017778136
+    time: 157.84532
+  - strength: 0.014625056
+    time: 158.592
+  - strength: 0.011541432
+    time: 159.85066
+  - strength: 0.01846988
+    time: 160.832
+  - strength: 0.013243893
+    time: 162.38931
+  - strength: 0.010894055
+    time: 162.92265
+  - strength: 0.011890943
+    time: 163.7333
+  - strength: 0.011295664
+    time: 164.33066
+  - strength: 0.010663902
+    time: 174.39998
+  - strength: 0.012077838
+    time: 175.10399
+  - strength: 0.018453475
+    time: 176.21332
+  - strength: 0.019761523
+    time: 177.55733
+  - strength: 0.020356873
+    time: 178.752
+  - strength: 0.014552891
+    time: 180.07465
+  - strength: 0.020042913
+    time: 181.26932
+  - strength: 0.01592987
+    time: 182.592
+  - strength: 0.01900863
+    time: 183.61598
+  - strength: 0.011614239
+    time: 184.53331
+  - strength: 0.017706478
+    time: 186.32533
+  - strength: 0.01984815
+    time: 187.69066
+  - strength: 0.019571783
+    time: 188.84265
+  - strength: 0.01385076
+    time: 190.18665
+  - strength: 0.018215595
+    time: 191.38132
+  - strength: 0.016651575
+    time: 192.704
+  - strength: 0.019682534
+    time: 193.72798
+  - strength: 0.018132703
+    time: 196.41599
+  - strength: 0.019526733
+    time: 197.78131
+  - strength: 0.019649291
+    time: 198.95465
+  - strength: 0.015403997
+    time: 200.27733
+  - strength: 0.020805467
+    time: 201.472
+  - strength: 0.016459692
+    time: 202.81598

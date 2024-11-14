@@ -9,11 +9,12 @@ public class BeatPlayer : MonoBehaviour
     [ReadOnly] public int startIndex;
 
     public event System.Action<Beat[]> OnBeat = (_) => { };
+    public static event System.Action OnPlayCompleted;
 
     private float playbackTime;
     private List<Beat> m_CurrentBeats;
 
-    private void Awake()
+    /* private void Awake()
     {
         audioSource.clip = audioData.clip;
         audioSource.Play();
@@ -22,12 +23,24 @@ public class BeatPlayer : MonoBehaviour
     private void Start()
     {
         m_CurrentBeats = new List<Beat>();
+    } */
+
+    public void Initialize(AudioData audioData)
+    {
+        m_CurrentBeats = new List<Beat>();
+        audioSource.clip = audioData.clip;
+        audioSource.Play();
     }
 
     private void Update()
     {
         if (!audioSource.isPlaying)
             return;
+
+        // Debug.Log($"time line {audioSource.time} - {audioSource.clip.length}");
+
+        if (Mathf.Abs(audioSource.time - audioSource.clip.length) <= 0.01f)
+            OnPlayCompleted?.Invoke();
 
         playbackTime = audioSource.time;
 
@@ -72,5 +85,13 @@ public class BeatPlayer : MonoBehaviour
         Beat next = audioData.beats[Mathf.Min(startIndex, audioData.beats.Length - 1)];
 
         Gizmos.DrawRay(new(playbackTime, 0.0f), new(0.0f, 100.0f * Mathf.Lerp(prev.strength, next.strength, Mathf.InverseLerp(prev.time, next.time, playbackTime))));
+    }
+
+    public void PauseUnpauseSong(bool isPause)
+    {
+        if (isPause)
+            audioSource.Pause();
+        else
+            audioSource.UnPause();
     }
 }
