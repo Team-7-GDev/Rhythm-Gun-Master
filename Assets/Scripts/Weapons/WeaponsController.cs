@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 
@@ -6,7 +7,7 @@ using UnityEngine;
 public class WeaponsController : MonoBehaviour
 {
     public Action OnWeaponFired;
-    public Action<bool> OnBotHit;
+    public Action<bool, Vector3> OnBotHit;
 
     [SerializeField]
     private enum WeaponType
@@ -15,13 +16,14 @@ public class WeaponsController : MonoBehaviour
         ASSULT_RIFLE = 1
     }
 
+
+    [SerializeField] private Camera m_weaponCamera;
     [SerializeField] private WeaponType m_WeaponType;
     [SerializeField] private AudioClip m_FireAudioClip;
     [SerializeField] private GameObject m_hitEffectPrefab;
     [SerializeField] private AudioSource m_WeaponAudiosource;
-
-    [Range(0, 1)]
-    [SerializeField] private float m_FireVolume;
+    [SerializeField] private Transform m_weaponMuzzleFlash;
+    [SerializeField] private LineRenderer m_trailRenderer;
 
     [Range(0, 20)]
     [SerializeField] private float m_YForce;
@@ -29,20 +31,35 @@ public class WeaponsController : MonoBehaviour
 
     public static Action<float> WeaponYForce = null;
 
-
     private static readonly int RIFLE_FIRE_ANIM_HASH = Animator.StringToHash("Shot_Rifle");
     private static readonly int PISTOL_FIRE_ANIM_HASH = Animator.StringToHash("Shot_Pistol");
 
 
+    private float m_FireVolume;
     private Camera m_MainCamera = null;
     private Animator m_WeaponAnimator = null;
+    private Coroutine m_muzzleFlashRoutine = null;
 
+
+
+    private void OnVolumeChangeHandler(float currVolume) => m_FireVolume = currVolume;
 
 
     void Awake()
     {
         m_MainCamera = Camera.main;
-        m_WeaponAnimator = GetComponent<Animator>();
+        m_trailRenderer.enabled = false;
+        m_weaponMuzzleFlash.gameObject.SetActive(false);
+        m_WeaponAnimator = GetComponentInChildren<Animator>();
+
+        m_FireVolume = PlayerPrefs.GetInt("g_volume", 100) / 100.0f;
+
+        SettingsOverlayScreen.OnVolumeChange += OnVolumeChangeHandler;
+    }
+
+    private void OnDestroy()
+    {
+        SettingsOverlayScreen.OnVolumeChange -= OnVolumeChangeHandler;
     }
 
     private void Update()
@@ -61,8 +78,7 @@ public class WeaponsController : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            // fire.
-            m_WeaponAudiosource.PlayOneShot(m_FireAudioClip);
+            // Fire.
             m_WeaponAnimator.Play(PISTOL_FIRE_ANIM_HASH, 0, 0.05f);
 
             PlaySFX();
@@ -76,7 +92,7 @@ public class WeaponsController : MonoBehaviour
     float deltaTime = 0;
     int m_FireCount = 0;
 
-    // rate of fire of m14 is 700/sec
+    // Rate of fire of m14 is 700/sec
     private void ControlRifle()
     {
         if (Input.GetMouseButton(0) && m_FireCount > 0)
@@ -86,7 +102,6 @@ public class WeaponsController : MonoBehaviour
             {
                 // fire
                 m_FireCount--;
-                m_WeaponAudiosource.PlayOneShot(m_FireAudioClip);
                 m_WeaponAnimator.Play(RIFLE_FIRE_ANIM_HASH, 0, 0.01f);
                 deltaTime = Mathf.Repeat(deltaTime, 0.1f);
 
@@ -98,28 +113,37 @@ public class WeaponsController : MonoBehaviour
         }
         else if (Input.GetMouseButtonUp(0))
         {
-            // reset the fire count;
+            // Reset the fire count;
             m_FireCount = 3;
         }
     }
 
     private void CalculateHit()
     {
+        Vector3 toPos = Vector3.zero;
         Ray ray = m_MainCamera.ViewportPointToRay(Vector3.one * 0.5f);
-        if (Physics.Raycast(ray, out RaycastHit hitInfo, 100f, 1 << LayerMask.NameToLayer("Enemy")))
+        if (Physics.SphereCast(ray, 0.009f, out RaycastHit hitInfo, 100f, 1 << LayerMask.NameToLayer("Enemy")))
         {
+            Vector3 hitPoint = hitInfo.point;
+            Bot bot = hitInfo.transform.GetComponentInParent<Bot>();
+
+            hitPoint.y = 0;
+            toPos = hitInfo.point;
+
             switch (hitInfo.collider.tag)
             {
                 case "Head":
-                    OnBotHit?.Invoke(true);
+                    bot.OnHit(hitPoint);
+                    OnBotHit?.Invoke(true, hitPoint);
                     Debug.Log($"Head Hit: {hitInfo.collider.name} - {hitInfo.transform.root.name}...");
-                    hitInfo.transform.root.root.gameObject.SetActive(false);
+                    // hitInfo.transform.root.root.gameObject.SetActive(false);
                     break;
 
                 case "Torso":
-                    OnBotHit?.Invoke(false);
+                    bot.OnHit(hitPoint);
+                    OnBotHit?.Invoke(false, hitPoint);
                     Debug.Log($"Torso hit: {hitInfo.collider.name} - {hitInfo.transform.root.name}...");
-                    hitInfo.transform.root.gameObject.SetActive(false);
+                    // hitInfo.transform.root.gameObject.SetActive(false);
                     break;
             }
 
@@ -131,12 +155,40 @@ public class WeaponsController : MonoBehaviour
         else
         {
             OnWeaponFired?.Invoke();
+            toPos = m_MainCamera.transform.position + m_MainCamera.transform.forward * 8.0f;
         }
+
+        if (m_muzzleFlashRoutine == null)
+            m_muzzleFlashRoutine = StartCoroutine(PlayMuzzleFlashAndTrail(toPos));
     }
 
     private void PlaySFX()
     {
         if (m_FireAudioClip != null && m_WeaponAudiosource != null)
             m_WeaponAudiosource.PlayOneShot(m_FireAudioClip, m_FireVolume);
+    }
+
+    private IEnumerator PlayMuzzleFlashAndTrail(Vector3 toPos)
+    {
+        Vector3 viewPoint = m_weaponCamera.WorldToViewportPoint(m_weaponMuzzleFlash.position);
+
+        // viewPoint = m_MainCamera.ViewportPointToRay(viewPoint).GetPoint(viewPoint.z * 2);
+        viewPoint = m_MainCamera.ViewportToWorldPoint(viewPoint);
+
+        m_trailRenderer.enabled = true;
+        // m_trailRenderer.SetPosition(0, Vector3.Lerp(viewPoint, toPos, UnityEngine.Random.Range(0.05f, 0.1f)));
+        m_trailRenderer.SetPosition(0, viewPoint);
+        m_trailRenderer.SetPosition(1, Vector3.Lerp(viewPoint, toPos, UnityEngine.Random.Range(0.75f, 0.9f)));
+
+        m_weaponMuzzleFlash.gameObject.SetActive(true);
+        m_weaponMuzzleFlash.localScale = Vector3.one * UnityEngine.Random.Range(0.7f, 1.2f);
+        m_weaponMuzzleFlash.rotation = Quaternion.AngleAxis(UnityEngine.Random.Range(-45f, 45f), Vector3.forward);
+
+        yield return new WaitForSeconds(UnityEngine.Random.Range(0.05f, 0.1f));
+
+        m_trailRenderer.enabled = false;
+        m_weaponMuzzleFlash.gameObject.SetActive(false);
+
+        m_muzzleFlashRoutine = null;
     }
 }

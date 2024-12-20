@@ -25,11 +25,22 @@ public class BeatPlayer : MonoBehaviour
         m_CurrentBeats = new List<Beat>();
     } */
 
+    private void OnVolumeChangeHandler(float currVolume) => audioSource.volume = currVolume;
+
     public void Initialize(AudioData audioData)
     {
         m_CurrentBeats = new List<Beat>();
         audioSource.clip = audioData.clip;
+        audioSource.volume = PlayerPrefs.GetInt("g_volume", 100) / 100.0f;
+
         audioSource.Play();
+
+        SettingsOverlayScreen.OnVolumeChange += OnVolumeChangeHandler;
+    }
+
+    private void OnDestroy()
+    {
+        SettingsOverlayScreen.OnVolumeChange -= OnVolumeChangeHandler;
     }
 
     private void Update()

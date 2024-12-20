@@ -2,18 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//TODO: need to implement this with strategy pattern...
 public class BotSpawner : MonoBehaviour
 {
+    [SerializeField] private Bot m_BotPrefab;
     [SerializeField] private BeatPlayer m_BeatPlayer;
-    [SerializeField] private GameObject m_Bot;
-    [SerializeField] private Transform m_StartPivot;
-    [SerializeField] private Transform m_EndPivot;
+    [SerializeField] private Vector3 m_spawnDirection;
+    [SerializeField] private float m_spawnOffsetDistance;
+    // [SerializeField] private Transform m_StartPivot;
+    // [SerializeField] private Transform m_EndPivot;
+    [SerializeField] private Transform[] m_spawnPositions;
+
 
     private float m_BotTimeout;
-    private float m_MinBeatStrength;
-    private float m_MaxBeatStrength;
+    // private float m_MinBeatStrength;
+    // private float m_MaxBeatStrength;
 
-    private List<GameObject> m_BotsPool;
+    private List<Bot> m_BotsPool;
+    // private List<Vector3> m_botPositions;
 
 
     public void SetDifficulty(DiffcultyType type)
@@ -49,19 +55,40 @@ public class BotSpawner : MonoBehaviour
         Beat min = new();
         Beat max = new();
 
-        m_BotsPool = new List<GameObject>();
+        m_BotsPool = new List<Bot>();
+
+        for (int i = 0; i < m_spawnPositions.Length; i++)
+        {
+            Bot bot = Instantiate(m_BotPrefab, m_spawnPositions[i].position, Quaternion.Euler(0, 180f, 0));
+            m_BotsPool.Add(bot);
+        }
+
+        /* m_botPositions = new List<Vector3>(m_spawnPositions.Length);
+
+        for (int i = 0; i < m_spawnPositions.Length; i++)
+            m_botPositions.Add(m_spawnPositions[i].position); */
 
         GetMinMaxBeatWRTStrength(ref min, ref max);
-        m_MinBeatStrength = min.strength;
-        m_MaxBeatStrength = max.strength;
+        // m_MinBeatStrength = min.strength;
+        // m_MaxBeatStrength = max.strength;
     }
 
     private void OnDrawGizmos()
     {
-        if (m_StartPivot && m_EndPivot)
+        /* if (m_StartPivot && m_EndPivot)
         {
             Gizmos.color = Color.yellow;
             Gizmos.DrawLine(m_StartPivot.position, m_EndPivot.position);
+        } */
+
+        if (m_spawnPositions == null || m_spawnPositions.Length == 0)
+            return;
+
+        Gizmos.color = Color.yellow;
+        for (int i = 0; i < m_spawnPositions.Length; i++)
+        {
+            Gizmos.DrawWireSphere(m_spawnPositions[i].position, 0.25f);
+            Gizmos.DrawRay(m_spawnPositions[i].position + Vector3.up * 0.125f, m_spawnDirection * m_spawnOffsetDistance);
         }
     }
 
@@ -75,17 +102,33 @@ public class BotSpawner : MonoBehaviour
         foreach (Beat beat in beats)
         {
             // float t = Mathf.InverseLerp(m_MinBeatStrength, m_MaxBeatStrength, beat.strength); // Don't use beat strength to spawn bot, problem facing it's shifted towards left
-            float t = Random.Range(0.0f, 1.0f);
-            Vector3 spawnPos = Vector3.Lerp(m_StartPivot.position, m_EndPivot.position, t);
+            // float t = Random.Range(0.0f, 1.0f);
+            // Vector3 spawnPos = Vector3.Lerp(m_StartPivot.position, m_EndPivot.position, t);
 
-            GameObject bot = GetBotFromPool();
-            bot.name = $"Bot ({beat.strength}, {beat.time})";
-            bot.transform.position = spawnPos;
-            bot.transform.rotation = Quaternion.Euler(0, 180f, 0);
+            // Bot bot = GetBotFromPool();
+            int index = Random.Range(0, m_BotsPool.Count);
+            Bot bot = m_BotsPool[index];
+            // Vector3 spawnPos = m_botPositions[index] + m_spawnDirection * Random.Range(0, m_spawnOffsetDistance);
+
+            m_BotsPool.RemoveAt(index);
+            bot.Initialize(0.25f, AddTobotList);
+            // bot.name = $"Bot ({beat.strength}, {beat.time})";
+            // bot.transform.SetPositionAndRotation(spawnPos, Quaternion.Euler(0, 180f, 0));
+
+            /* if (m_botPositions.Count == 0)
+            {
+                for (int i = 0; i < m_spawnPositions.Length; i++)
+                    m_botPositions.Add(m_spawnPositions[i].position);
+            } */
 
             // Destroy(bot, 0.5f);
             StartCoroutine(DestroyBot(bot, m_BotTimeout));
         }
+    }
+
+    private void AddTobotList(Bot bot)
+    {
+        m_BotsPool.Add(bot);
     }
 
     private void GetMinMaxBeatWRTStrength(ref Beat min, ref Beat max)
@@ -110,24 +153,24 @@ public class BotSpawner : MonoBehaviour
         }
     }
 
-    private GameObject GetBotFromPool()
+    /* private Bot GetBotFromPool()
     {
         for (int i = 0; i < m_BotsPool.Count; i++)
         {
-            if (!m_BotsPool[i].activeSelf)
+            if (!m_BotsPool[i].gameObject.activeSelf)
             {
-                m_BotsPool[i].SetActive(true);
+                m_BotsPool[i].gameObject.SetActive(true);
                 return m_BotsPool[i];
             }
         }
 
-        GameObject bot = Instantiate(m_Bot/* , transform */);
+        Bot bot = Instantiate(m_Bot);
         m_BotsPool.Add(bot);
 
         return bot;
-    }
+    } */
 
-    private IEnumerator DestroyBot(GameObject botGo, float timeout)
+    private IEnumerator DestroyBot(Bot botGo, float timeout)
     {
         float time = 0;
         do
@@ -135,11 +178,11 @@ public class BotSpawner : MonoBehaviour
             yield return null;
 
             time += Time.deltaTime;
-            if (!botGo.activeSelf)
+            if (!botGo.IsEnable)
                 break;
 
         } while (time < timeout);
 
-        botGo.SetActive(false);
+        botGo.Hide();
     }
 }

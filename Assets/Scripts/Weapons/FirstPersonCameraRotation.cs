@@ -8,7 +8,7 @@ using UnityEngine.Rendering.Universal;
 /// </summary>
 public class FirstPersonCameraRotation : MonoBehaviour
 {
-	const string xAxis = "Mouse X"; //Strings in direct code generate garbage, storing and re-using them creates no garbage
+	// const string xAxis = "Mouse X"; //Strings in direct code generate garbage, storing and re-using them creates no garbage
 	const string yAxis = "Mouse Y";
 
 
@@ -19,6 +19,7 @@ public class FirstPersonCameraRotation : MonoBehaviour
 
 	private float m_YForce = 0;
 	private Vector2 rotation = Vector2.zero;
+	private Transform mainCameraTransform = null;
 
 
 
@@ -31,13 +32,13 @@ public class FirstPersonCameraRotation : MonoBehaviour
 	public void Initialize()
 	{
 		// Stack weapons camera to main base camera...
-		Camera baseCamera = GetComponent<Camera>();
+		Camera baseCamera = Camera.main;
 		Camera[] cameras = FindObjectsOfType<Camera>();
 		UniversalAdditionalCameraData baseCameraData = baseCamera.GetUniversalAdditionalCameraData();
 
 		for (int i = 0; i < cameras.Length; i++)
 		{
-			if (cameras[i] == this)
+			if (cameras[i] == baseCamera)
 				continue;
 
 			UniversalAdditionalCameraData cameraData = cameras[i].GetUniversalAdditionalCameraData();
@@ -48,6 +49,7 @@ public class FirstPersonCameraRotation : MonoBehaviour
 		Cursor.visible = false;
 		Cursor.lockState = CursorLockMode.Locked;
 
+		mainCameraTransform = baseCamera.transform;
 		WeaponsController.WeaponYForce += AddWeaponForceHandler;
 	}
 
@@ -67,13 +69,15 @@ public class FirstPersonCameraRotation : MonoBehaviour
 		if (GameManager.IsGameOver || GameManager.IsGamePause)
 			return;
 
-		rotation.x += Input.GetAxis(xAxis) * m_Sensitivity;
+		// for look rotation...
+		// rotation.x += Input.GetAxis(xAxis) * m_Sensitivity;
 		rotation.y += Input.GetAxis(yAxis) * m_Sensitivity;
 		rotation.y = Mathf.Clamp(rotation.y, -m_YRotationLimit, m_YRotationLimit);
-		var xQuat = Quaternion.AngleAxis(rotation.x, Vector3.up);
+		// var xQuat = Quaternion.AngleAxis(rotation.x, Vector3.up);
 		var yQuat = Quaternion.AngleAxis(rotation.y + m_YForce, Vector3.left);
 
-		transform.localRotation = xQuat * yQuat; // Quaternions seem to rotate more consistently than EulerAngles. Sensitivity seemed to change slightly at certain degrees using Euler. transform.localEulerAngles = new Vector3(-rotation.y, rotation.x, 0);
+		// transform.localRotation = xQuat * yQuat; // Quaternions seem to rotate more consistently than EulerAngles. Sensitivity seemed to change slightly at certain degrees using Euler. transform.localEulerAngles = new Vector3(-rotation.y, rotation.x, 0);
+		mainCameraTransform.localRotation = yQuat;
 
 		if (m_YForce > 0)
 			m_YForce = Mathf.Lerp(m_YForce, 0, Time.deltaTime * 15f);
